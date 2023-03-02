@@ -2,7 +2,7 @@ name: Fineract backend build
 on:
   push:
     branches:
-      - develop
+      - staging
 
 jobs:
   fineractBuild:
@@ -31,6 +31,6 @@ jobs:
     - name: Upload docker image to Jfrog
       run: |
         TAG=$(date +%Y-%m-%d-%H-%M)
-        docker tag fineract:latest sendy-docker-local.jfrog.io/fineract:prod_$TAG
-        docker push sendy-docker-local.jfrog.io/fineract:prod_$TAG
+        docker tag fineract:latest sendy-docker-local.jfrog.io/fineract:dev_$TAG
+        docker push sendy-docker-local.jfrog.io/fineract:dev_$TAG
   
