@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.inlinecob;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -31,6 +32,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.LongStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -207,12 +209,12 @@ public class InlineLoanCOBTest {
         Assertions.assertTrue(loanDelinquencyTags.isEmpty());
         Assertions.assertEquals(LocalDate.of(2020, 3, 2), loan.getLastClosedBusinessDate());
 
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 4, 5));
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 4, 4));
         inlineLoanCOBHelper.executeInlineCOB(List.of(loanID.longValue()));
 
         loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
         loanDelinquencyTags = loanTransactionHelper.getLoanDelinquencyTags(requestSpec, responseSpec, loanID);
-        Assertions.assertEquals(LocalDate.of(2020, 4, 5), loan.getLastClosedBusinessDate());
+        Assertions.assertEquals(LocalDate.of(2020, 4, 4), loan.getLastClosedBusinessDate());
         Assertions.assertEquals(1, loanDelinquencyTags.size());
         Assertions.assertEquals(LocalDate.of(2020, 4, 3), loanDelinquencyTags.get(0).getAddedOnDate());
 
@@ -390,13 +392,22 @@ public class InlineLoanCOBTest {
         Assertions.assertEquals(LocalDate.of(2020, 3, 9), loan.getLastClosedBusinessDate());
     }
 
+    @Test
+    public void testInlineCOBRequestBodyItemLimitValidation() {
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
+        List<Long> loanIds = LongStream.rangeClosed(1, 1001).boxed().toList();
+        String responseUserMessage = inlineLoanCOBHelper.executeInlineCOB(loanIds, "defaultUserMessage");
+        assertEquals("Size of the loan IDs list cannot be over 1000", responseUserMessage);
+    }
+
     private void createNewSimpleUserWithoutBypassPermission() {
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        String username = Utils.randomNameGenerator("NotificationUser", 4);
+        String username = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         String password = Utils.randomStringGenerator("aA1", 10); // prefix is to conform with the password rules
         String simpleRoleId = createSimpleRole();
         PostUsersRequest createUserRequest = new PostUsersRequest().username(username)
-                .firstname(Utils.randomNameGenerator("NotificationFN", 4)).lastname(Utils.randomNameGenerator("NotificationLN", 4))
+                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
                 .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
                 .roles(List.of(simpleRoleId)).officeId(headOffice.getId());
 

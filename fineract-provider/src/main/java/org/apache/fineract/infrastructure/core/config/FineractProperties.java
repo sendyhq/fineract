@@ -53,6 +53,10 @@ public class FineractProperties {
     private FineractJobProperties job;
 
     private FineractTemplateProperties template;
+    private FineractJpaProperties jpa;
+
+    private FineractQueryProperties query;
+    private FineractApiProperties api;
 
     @Getter
     @Setter
@@ -67,6 +71,9 @@ public class FineractProperties {
         private String identifier;
         private String name;
         private String description;
+        private String masterPassword;
+        private String encryption;
+
     }
 
     @Getter
@@ -244,4 +251,33 @@ public class FineractProperties {
         private boolean regexWhitelistEnabled;
         private List<String> regexWhitelist;
     }
+
+    @Getter
+    @Setter
+    public static class FineractJpaProperties {
+
+        private boolean statementLoggingEnabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractQueryProperties {
+
+        private int inClauseParameterSizeLimit;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractApiProperties {
+
+        private FineractBodyItemSizeLimitProperties bodyItemSizeLimit;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractBodyItemSizeLimitProperties {
+
+        private int inlineLoanCob;
+    }
+
 }
