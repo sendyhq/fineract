@@ -166,7 +166,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
         // the return statement contains the exact sql required
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, encodedName);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, name);
 
         if (rs.next() && rs.getString("the_sql") != null) {
             return rs.getString("the_sql");
